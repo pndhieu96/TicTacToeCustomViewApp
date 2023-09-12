@@ -8,10 +8,11 @@
 
     <com.example.tictactoecustomviewapp.CustomView.TicTacToeView
         android:id="@+id/ticTacToeView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:background="@color/teal_200"
         app:TicTacToeView_stroke_color="@color/black"
-        tools:layout_editor_absoluteX="10dp"
-        tools:layout_editor_absoluteY="10dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,12 +9,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintSet.Motion
 import androidx.core.content.ContextCompat
 import com.example.tictactoecustomviewapp.Object.Player
 import com.example.tictactoecustomviewapp.Object.TicTacToeItem
 import com.example.tictactoecustomviewapp.R
-import kotlin.math.log
+import com.example.tictactoecustomviewapp.Ulities
+import kotlin.math.min
 
 class TicTacToeView : View {
     private val density = resources.displayMetrics.density
@@ -23,9 +23,9 @@ class TicTacToeView : View {
     private val cols = 3
     private val maxIndex = 2
     private var matrix = Array(rows) { Array(cols) { TicTacToeItem(Rect(), Player.NONE) } }
-    private var floatWith = width.toFloat()
-    private var floatHeight = floatWith
-    private var floatWithOfAItem = 1f/3 * floatWith
+    private var floatWith : Float = 0.0f
+    private var floatHeight : Float = 0.0f
+    private var floatWithOfAItem: Float = 0.0f
 
     private val textPaint = TextPaint()
     private val paint: Paint = Paint()
@@ -38,7 +38,10 @@ class TicTacToeView : View {
     private val path = Path()
     private var shouldAnimate = false
 
+    private var isWin = false
+
     constructor(context: Context) : super(context) {
+
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
@@ -58,17 +61,61 @@ class TicTacToeView : View {
         val strokeColor = typedArray.getColor(R.styleable.TicTacToeView_TicTacToeView_stroke_color, Color.BLACK)
         typedArray.recycle()
 
-        paint.color = strokeColor
-        paint.strokeWidth = 5f
-        paint.strokeWidth = density * 3
+        this.paint.apply {
+            this.color = strokeColor
+            this.strokeWidth = density * 3
+        }
+        this.highlightPaint.apply {
+            this.color = ContextCompat.getColor(context, R.color.highlight_color)
+            this.style = Paint.Style.FILL
+            this.isAntiAlias = true
+        }
+        this.winLinetPaint.apply {
+            this.style = Paint.Style.STROKE
+            this.color = Color.RED
+            this.strokeWidth = 5f
+        }
+    }
 
-        highlightPaint.color = ContextCompat.getColor(context, R.color.highlight_color)
-        highlightPaint.style = Paint.Style.FILL
-        highlightPaint.isAntiAlias = true
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        Log.d("TicTacToeView","onAttachedToWindow")
+    }
 
-        winLinetPaint.style = Paint.Style.STROKE;
-        winLinetPaint.color = Color.RED;
-        winLinetPaint.strokeWidth = 5f;
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Log.d("TicTacToeView","onMeasure")
+        val desiredWith = 500 + paddingLeft + paddingRight
+        val width = measureDimension(desiredWith, widthMeasureSpec)
+        val desiredHeight = desiredWith
+        val height = measureDimension(desiredHeight, heightMeasureSpec)
+
+        setMeasuredDimension(width, height)
+
+        Log.v("TicTacToeView", "onMeasure w " + MeasureSpec.toString(widthMeasureSpec))
+        Log.v("TicTacToeView", "onMeasure h " + MeasureSpec.toString(heightMeasureSpec))
+    }
+
+    private fun measureDimension(desiredSize: Int, measureSpec: Int): Int {
+        var result: Int?
+        val specMode = MeasureSpec.getMode(measureSpec)
+        val specSize = MeasureSpec.getSize(measureSpec)
+
+        if(specMode == MeasureSpec.EXACTLY) {
+            result = specSize
+        } else {
+            /* specMode = MeasureSpec.UNSPECIFIED */
+            result = desiredSize
+            if(specMode == MeasureSpec.AT_MOST) {
+                result = min(result, specSize)
+            }
+        }
+        return result
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        Log.d("TicTacToeView","onLayout")
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -76,7 +123,7 @@ class TicTacToeView : View {
         if(isFirst) {
             floatWith = width.toFloat()
             floatHeight = floatWith
-            floatWithOfAItem = 1f/3*floatWith
+            floatWithOfAItem = 1f/3 * floatWith!!
             saveItems()
             isFirst = false
         }
@@ -138,6 +185,9 @@ class TicTacToeView : View {
     * textPaint.fontMetrics.ascent: calculate text height base on baseline
     * */
     private fun drawTextInsideRectangle(canvas: Canvas, positionRow: Int, positionCol: Int, player: Player) {
+        if(positionRow == -1 || positionCol == -1) {
+            return
+        }
         val item = matrix[positionRow][positionCol]
         val textSizeInPixels = resources.getDimension(R.dimen.text_size_player)
         item.player = player
@@ -150,6 +200,9 @@ class TicTacToeView : View {
     }
 
     private fun updateMatrix(index: Pair<Int,Int>) {
+        if(index.first == -1 || index.second == -1 || isWin) {
+            return
+        }
         val item = matrix[index.first][index.second]
         if(item.player == Player.NONE) {
             item.player = firstPlayer
@@ -163,8 +216,10 @@ class TicTacToeView : View {
         }
 
         val winList = checkForWin()
+
         if(winList[0] != -1) {
             animateWin(winList[0],winList[1],winList[2],winList[3])
+            isWin = true
         }
     }
 
@@ -177,6 +232,9 @@ class TicTacToeView : View {
     }
 
     private fun drawHighLightRectangle(canvas: Canvas) {
+        if(touchedRectPair.first == -1 || touchedRectPair.second == -1) {
+            return
+        }
         canvas.drawRect(matrix[touchedRectPair.first][touchedRectPair.second].rect, highlightPaint)
     }
 
@@ -193,6 +251,8 @@ class TicTacToeView : View {
     }
 
     fun animateWin(x1: Int, y1: Int, x3: Int, y3: Int) {
+        if(isWin) return
+
         val valueAnimator = ValueAnimator.ofFloat(1f, 0f)
         val winCoordinates = arrayOf(x1, y1, x3, y3)
 
@@ -226,6 +286,7 @@ class TicTacToeView : View {
         touching = false
         isFirst = true
         shouldAnimate = false
+        isWin = false
         invalidate()
     }
 
@@ -233,9 +294,9 @@ class TicTacToeView : View {
         val result = arrayOf(-1,-1,-1,-1)
         // Duyệt từng hàng
         for (i in 0 until rows) {
-            var cell1 = matrix[i][0]
-            var cell2 = matrix[i][1]
-            var cell3 = matrix[i][2]
+            val cell1 = matrix[i][0]
+            val cell2 = matrix[i][1]
+            val cell3 = matrix[i][2]
 
             if (cell1.player != Player.NONE && cell1.player == cell2.player && cell2.player == cell3.player) {
                 result[0] = i
@@ -248,9 +309,9 @@ class TicTacToeView : View {
 
         // Duyệt từng cột
         for (i in 0 until cols) {
-            var cell1 = matrix[0][i]
-            var cell2 = matrix[1][i]
-            var cell3 = matrix[2][i]
+            val cell1 = matrix[0][i]
+            val cell2 = matrix[1][i]
+            val cell3 = matrix[2][i]
 
             if (cell1.player != Player.NONE && cell1.player == cell2.player && cell2.player == cell3.player) {
                 result[0] = 0
