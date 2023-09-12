@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:background="@color/teal_200"
+        app:TicTacToeView_player_size="30sp"
         app:TicTacToeView_stroke_color="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

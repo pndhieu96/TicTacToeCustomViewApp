@@ -59,6 +59,8 @@ class TicTacToeView : View {
     private fun init(typedArray: TypedArray) {
         // Initialize any setup here
         val strokeColor = typedArray.getColor(R.styleable.TicTacToeView_TicTacToeView_stroke_color, Color.BLACK)
+        val textSize = typedArray.getDimension(R.styleable.TicTacToeView_TicTacToeView_player_size,
+            resources.getDimension(R.dimen.text_size_player))
         typedArray.recycle()
 
         this.paint.apply {
@@ -74,6 +76,9 @@ class TicTacToeView : View {
             this.style = Paint.Style.STROKE
             this.color = Color.RED
             this.strokeWidth = 5f
+        }
+        this.textPaint.apply {
+            this.textSize = textSize
         }
     }
 
@@ -189,9 +194,7 @@ class TicTacToeView : View {
             return
         }
         val item = matrix[positionRow][positionCol]
-        val textSizeInPixels = resources.getDimension(R.dimen.text_size_player)
         item.player = player
-        textPaint.textSize = textSizeInPixels
         val xOffset = textPaint.measureText(item.player.symbol) * 0.5f
         val yOffset = textPaint.fontMetrics.ascent * (-0.5f)
         val textX = (item.rect.exactCenterX()) - xOffset

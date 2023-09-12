@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="TicTacToeView">
         <attr name="TicTacToeView_stroke_color" format="color"/>
+        <attr name="TicTacToeView_player_size" format="dimension"/>
     </declare-styleable>
 </resources>
