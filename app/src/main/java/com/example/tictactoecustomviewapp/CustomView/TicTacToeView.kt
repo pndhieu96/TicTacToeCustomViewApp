@@ -67,6 +67,9 @@ class TicTacToeView : View {
             this.color = strokeColor
             this.strokeWidth = density * 3
         }
+        this.textPaint.apply {
+            this.textSize = textSize
+        }
         this.highlightPaint.apply {
             this.color = ContextCompat.getColor(context, R.color.highlight_color)
             this.style = Paint.Style.FILL
@@ -76,9 +79,6 @@ class TicTacToeView : View {
             this.style = Paint.Style.STROKE
             this.color = Color.RED
             this.strokeWidth = 5f
-        }
-        this.textPaint.apply {
-            this.textSize = textSize
         }
     }
 
@@ -295,7 +295,7 @@ class TicTacToeView : View {
 
     private fun checkForWin() : Array<Int> {
         val result = arrayOf(-1,-1,-1,-1)
-        // Duyệt từng hàng
+        /* Duyệt từng hàng */
         for (i in 0 until rows) {
             val cell1 = matrix[i][0]
             val cell2 = matrix[i][1]
@@ -310,7 +310,7 @@ class TicTacToeView : View {
             }
         }
 
-        // Duyệt từng cột
+        /* Duyệt từng cột */
         for (i in 0 until cols) {
             val cell1 = matrix[0][i]
             val cell2 = matrix[1][i]
@@ -325,7 +325,7 @@ class TicTacToeView : View {
             }
         }
 
-        // Duyệt Đường chéo 1
+        /* Duyệt Đường chéo 1 */
         var cell1 = matrix[0][maxIndex]
         var cell2 = matrix[1][maxIndex-1]
         var cell3 = matrix[2][maxIndex-2]
@@ -338,7 +338,7 @@ class TicTacToeView : View {
             return result
         }
 
-        // Duyệt Đường chéo 2
+        /* Duyệt Đường chéo 2 */
         cell1 = matrix[0][0]
         cell2 = matrix[1][1]
         cell3 = matrix[2][2]
@@ -383,6 +383,4 @@ class TicTacToeView : View {
         }
         return true
     }
-
-
 }
